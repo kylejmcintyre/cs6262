@@ -39,13 +39,26 @@ def validate_connections(lines):
             lines = lines[0:10]
             print("Detected {key} on lines {lines} and possibly more".format(**vars()))
 
-    uniques = set([frozenset([split[1] + ":" + split[2], split[3] + ":" + split[4]]) for split, idx in splits])
+    connections = set()
+    duplicates = set()
+
+    for split, idx in splits:
+        connection = frozenset([split[1] + ":" + split[2], split[3] + ":" + split[4]])
+
+        if connection in connections:
+            duplicates.add(connection)
+
+        connections.add(connection)
 
     expected_conns = 30543
-    actual_conns   = len(uniques)
+    actual_conns   = len(connections)
 
     if actual_conns < expected_conns:
         print("You only have {actual_conns} unique connection entries. Should have {expected_conns}.".format(**vars()))
+
+    if len(duplicates) > 0:
+        duplicates = list(duplicates)[:10]
+        print("Detected duplicate entries: {duplicates} and possibly more".format(**vars()))
 
 def validate_hosts(lines):
     splits = [line.split("|") for line in lines]

@@ -22,7 +22,7 @@ def is_legal_ipv4(s):
 
 def validate_connections(lines):
     splits = [line.split("|") for line in lines]
-    index  = range(1, len(splits) + 1)
+    index  = range(1, len(lines) + 1)
     splits = zip(splits, index)
 
     problems = {}
@@ -38,12 +38,14 @@ def validate_connections(lines):
         if len(lines) > 0:
             lines = lines[0:10]
             print("Detected {key} on lines {lines} and possibly more".format(**vars()))
-    
-    expected_conns = 30543
-    num_uniques = len(set([frozenset(split[1:5]) for split, idx in splits]))
 
-    if num_uniques < expected_conns:
-        print("You only have {num_uniques} unique connection entries. Should have {expected_conns}.".format(**vars()))
+    uniques = set([frozenset([split[1] + ":" + split[2], split[3] + ":" + split[4]]) for split, idx in splits])
+
+    expected_conns = 30543
+    actual_conns   = len(uniques)
+
+    if actual_conns < expected_conns:
+        print("You only have {actual_conns} unique connection entries. Should have {expected_conns}.".format(**vars()))
 
 def validate_hosts(lines):
     splits = [line.split("|") for line in lines]
@@ -64,18 +66,21 @@ def validate_hosts(lines):
     num_uniques = len(set([frozenset(split[1:2]) for split, idx in splits]))
 
     if num_uniques != len(splits):
-        print("You appera to have duplicate host entries in your host file")
+        print("You appear to have duplicate host entries in your host file")
 
-if args.connections is not None:
-    print("\nValidating {args.connections}".format(**vars()))
-    with open(args.connections) as f:
-        validate_connections(f.readlines())
-else:
-    print("No connections file supplied for validation")
-
-if args.hosts is not None:
-    print("\nValidating {args.hosts}".format(**vars()))
-    with open(args.hosts) as f:
-        validate_hosts(f.readlines())
-else:
-    print("No hosts file supplied for validation")
+if __name__ == '__main__':
+    if args.connections is not None:
+        print("\nValidating {args.connections}\n".format(**vars()))
+        with open(args.connections) as f:
+            validate_connections(f.readlines())
+        print("\nFinished validating {args.connections}. No preceeding errors means you're good".format(**vars()))
+    else:
+        print("No connections file supplied for validation")
+    
+    if args.hosts is not None:
+        print("\nValidating {args.hosts}\n".format(**vars()))
+        with open(args.hosts) as f:
+            validate_hosts(f.readlines())
+        print("\nFinished validating {args.hosts}. No preceeding errors means you're good".format(**vars()))
+    else:
+        print("No hosts file supplied for validation")
